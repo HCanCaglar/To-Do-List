@@ -1,0 +1,41 @@
+#submit-todo {
+  margin-top: 30px;
+}
+
+i {
+  margin-left: 10px;
+}
+.btn-dark {
+  margin-top: 30px;
+}
+
+.card {
+  border-color: black;
+}
+.container {
+  width: 50%;
+}
+.card-header {
+  border-color: black;
+}
+
+.custom-line {
+  height: 2px;
+  width: 99%;
+  align-self: center;
+  background-color: rgba(0, 0, 0, 0.475);
+  margin: 1rem 0;
+}
+
+#enter-todo {
+  border-color: black;
+}
+
+#filter {
+  border-color: black;
+  margin-bottom: 30px;
+}
+
+#single-todo {
+  border-color: black;
+}
