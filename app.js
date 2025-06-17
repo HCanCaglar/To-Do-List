@@ -1,6 +1,6 @@
 /*
-2- delete todo
-3-filter todo
+add check to localstorage
+make check affect css
 */
 const cardEnterTodo = document.querySelector("#card-enter");
 const formEnterTodo = document.querySelector("#enter-todo");
@@ -12,6 +12,7 @@ const filteredTodos = document.querySelector("#filter");
 const allTodos = document.querySelector("#all-todos");
 const todoList = document.querySelector(".list-group");
 const modalElement = document.getElementById("exampleModal");
+const checkStatus = document.querySelectorAll(".checkStatus");
 
 eventListeners();
 
@@ -21,6 +22,7 @@ function eventListeners() {
   delAllbtn.addEventListener("click", deleteAllTodos);
   allTodos.addEventListener("click", deleteTodo);
   filteredTodos.addEventListener("keyup", filterTodos);
+  allTodos.addEventListener("change", completeTodo);
   formEnterTodo.addEventListener("keyup", function (e) {
     if (e.key === "Enter") {
       e.preventDefault();
@@ -43,17 +45,18 @@ function showAlert(type, message) {
 }
 
 function addTodo(e) {
+  console.log(formEnterTodo.value);
+  console.log(e);
+
   const newtodo = formEnterTodo.value.trim().toLowerCase();
   const originaltodo = formEnterTodo.value.trim();
 
   let todos;
-  /*<li class="list-group-item" id="single-todo">
-              example todo
-              <a href="#" class="delete-item">
-                <i class="fa fa-remove"></i>
-              </a>
-            </li> */
-
+  if (localStorage.getItem("todos") === null) {
+    todos = [];
+  } else {
+    todos = JSON.parse(localStorage.getItem("todos"));
+  }
   if (originaltodo === "") {
     showAlert("danger", "Please add a Todo.");
   } else if (checkDuplicates(newtodo)) {
@@ -61,23 +64,37 @@ function addTodo(e) {
   } else {
     const listItem = document.createElement("li");
     const link = document.createElement("a");
+    const label = document.createElement("label");
+    const index = todos.length;
+
     link.href = "#";
     link.className = "delete-item";
     link.innerHTML = "<i class='fa fa-remove'></i>";
+    link.setAttribute("data-index", todos.length);
+
+    label.id = "done";
+    label.innerHTML = `<input type="checkbox" class="checkStatus" data-index="${index}">`;
+
+    label.innerHTML += "<span class='checkmark'></span>";
+
     listItem.className = "list-group-item";
     listItem.id = "single-todo";
     listItem.appendChild(document.createTextNode(originaltodo));
 
     listItem.appendChild(link);
+    listItem.appendChild(label);
+
     allTodos.appendChild(listItem);
     e.preventDefault();
 
-    if (localStorage.getItem("todos") === null) {
-      todos = [];
-    } else {
-      todos = JSON.parse(localStorage.getItem("todos"));
-    }
-    todos.push(originaltodo);
+    //todos.push(originaltodo);
+
+    todos.push({
+      text: originaltodo,
+      completed: false,
+      index: index,
+    });
+    //link.setAttribute("data-index", todos.length - 1);
 
     localStorage.setItem("todos", JSON.stringify(todos));
     formEnterTodo.value = "";
@@ -93,17 +110,33 @@ function showTodos() {
     todos = JSON.parse(localStorage.getItem("todos"));
   }
 
-  todos.forEach(function (todos) {
+  todos.forEach(function (todo, index) {
     const listItem = document.createElement("li");
     const link = document.createElement("a");
+    const label = document.createElement("label");
+
     link.href = "#";
     link.className = "delete-item";
     link.innerHTML = "<i class='fa fa-remove'></i>";
+    link.setAttribute("data-index", todos.length);
+
+    label.id = "done";
+    label.innerHTML = `<input type="checkbox" class="checkStatus" data-index="${index}" ${
+      todo.completed ? "checked" : ""
+    }>`;
+    label.innerHTML += "<span class='checkmark'></span>";
+
+    listItem.className = "list-group-item";
     listItem.className = "list-group-item";
     listItem.id = "single-todo";
-    listItem.appendChild(document.createTextNode(todos));
+    listItem.appendChild(document.createTextNode(todo.text));
+    if (todo.completed) {
+      listItem.classList.add("completed");
+    }
 
     listItem.appendChild(link);
+    listItem.appendChild(label);
+
     allTodos.appendChild(listItem);
   });
 }
@@ -119,7 +152,8 @@ function checkDuplicates(todo) {
   }
 
   for (var todo of todos) {
-    if (todo == newtodo) {
+    console.log(todo);
+    if (todo.text.toLowerCase() == newtodo) {
       return true;
     }
   }
@@ -139,11 +173,30 @@ function deleteTodo(e) {
     e.target.parentElement.parentElement.remove();
     todos = todos.filter(function (todoItem) {
       return (
-        todoItem !==
+        todoItem.text.trim().toLowerCase() !==
         e.target.parentElement.parentElement.textContent.trim().toLowerCase()
       );
     });
     localStorage.setItem("todos", JSON.stringify(todos));
+  }
+}
+
+function completeTodo(e) {
+  todos = JSON.parse(localStorage.getItem("todos"));
+
+  if (e.target.className == "checkStatus") {
+    const index = parseInt(e.target.getAttribute("data-index"));
+    let todos = JSON.parse(localStorage.getItem("todos"));
+
+    if (!isNaN(index)) {
+      todos[index].completed = e.target.checked; // true or false
+      localStorage.setItem("todos", JSON.stringify(todos));
+    }
+  }
+  if (e.target.checked) {
+    e.target.parentElement.parentElement.classList.add("completed");
+  } else {
+    e.target.parentElement.parentElement.classList.remove("completed");
   }
 }
 

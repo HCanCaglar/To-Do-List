@@ -1,7 +1,9 @@
 #submit-todo {
   margin-top: 30px;
 }
-
+#priority {
+  margin-top: 30px;
+}
 i {
   margin-left: 10px;
 }
@@ -38,4 +40,15 @@ i {
 
 #single-todo {
   border-color: black;
+}
+.list-group-item {
+  display: flex;
+}
+#done {
+  display: flex;
+  margin-left: auto;
+}
+
+.completed {
+  background-color: rgb(72, 224, 72);
 }
