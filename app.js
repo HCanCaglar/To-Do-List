@@ -13,8 +13,10 @@ const allTodos = document.querySelector("#all-todos");
 const todoList = document.querySelector(".list-group");
 const modalElement = document.getElementById("exampleModal");
 const checkStatus = document.querySelectorAll(".checkStatus");
-
+const priorityBtn = document.querySelector("#priority");
 eventListeners();
+
+let isPrioritized = false;
 
 function eventListeners() {
   submitTodobtn.addEventListener("click", addTodo);
@@ -23,12 +25,25 @@ function eventListeners() {
   allTodos.addEventListener("click", deleteTodo);
   filteredTodos.addEventListener("keyup", filterTodos);
   allTodos.addEventListener("change", completeTodo);
+  priorityBtn.addEventListener("click", prioritizeTodo);
   formEnterTodo.addEventListener("keyup", function (e) {
     if (e.key === "Enter") {
       e.preventDefault();
       addTodo(e);
     }
   });
+}
+
+function prioritizeTodo(e) {
+  if (
+    e.target.id == "priority" &&
+    formEnterTodo.value.trim().toLowerCase() != ""
+  ) {
+    isPrioritized = true;
+    showAlert("success", "Next todo will be prioritized!");
+  } else {
+    showAlert("danger", "Please enter a todo first.");
+  }
 }
 
 function showAlert(type, message) {
@@ -45,11 +60,9 @@ function showAlert(type, message) {
 }
 
 function addTodo(e) {
-  console.log(formEnterTodo.value);
-  console.log(e);
-
   const newtodo = formEnterTodo.value.trim().toLowerCase();
   const originaltodo = formEnterTodo.value.trim();
+  const priorityValue = isPrioritized ? 1 : 0;
 
   let todos;
   if (localStorage.getItem("todos") === null) {
@@ -71,6 +84,7 @@ function addTodo(e) {
     link.className = "delete-item";
     link.innerHTML = "<i class='fa fa-remove'></i>";
     link.setAttribute("data-index", todos.length);
+    link.setAttribute("data-priority", 0);
 
     label.id = "done";
     label.innerHTML = `<input type="checkbox" class="checkStatus" data-index="${index}">`;
@@ -93,11 +107,19 @@ function addTodo(e) {
       text: originaltodo,
       completed: false,
       index: index,
+      priority: priorityValue,
     });
     //link.setAttribute("data-index", todos.length - 1);
+    if (priorityValue === 1) {
+      allTodos.insertBefore(listItem, allTodos.firstChild);
+      listItem.style.color = "red";
+    } else {
+      allTodos.appendChild(listItem);
+    }
 
     localStorage.setItem("todos", JSON.stringify(todos));
     formEnterTodo.value = "";
+    isPrioritized = false;
   }
 }
 
@@ -119,6 +141,7 @@ function showTodos() {
     link.className = "delete-item";
     link.innerHTML = "<i class='fa fa-remove'></i>";
     link.setAttribute("data-index", todos.length);
+    link.setAttribute("data-priority", 0);
 
     label.id = "done";
     label.innerHTML = `<input type="checkbox" class="checkStatus" data-index="${index}" ${
@@ -137,7 +160,12 @@ function showTodos() {
     listItem.appendChild(link);
     listItem.appendChild(label);
 
-    allTodos.appendChild(listItem);
+    if (todo.priority === 1) {
+      allTodos.insertBefore(listItem, allTodos.firstChild);
+      listItem.style.color = "red";
+    } else {
+      allTodos.appendChild(listItem);
+    }
   });
 }
 
@@ -152,7 +180,6 @@ function checkDuplicates(todo) {
   }
 
   for (var todo of todos) {
-    console.log(todo);
     if (todo.text.toLowerCase() == newtodo) {
       return true;
     }
